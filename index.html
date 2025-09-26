@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Daily Challenge • Spark</title>
+  <style>
+    :root{
+      --bg1:#0f172a; /* slate-900 */
+      --bg2:#06142a;
+      --card:#0b1220;
+      --accent:#7c3aed; /* violet */
+      --glass: rgba(255,255,255,0.04);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(124,58,237,0.08), transparent),
+                  linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:#e6eef8;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;align-items:center;justify-content:center;padding:32px;
+    }
+    .stage{width:100%;max-width:920px}
+
+    header{
+      display:flex;align-items:center;gap:12px;margin-bottom:18px;
+    }
+    .logo{display:flex;align-items:center;gap:10px}
+    .logo .mark{
+      width:48px;height:48px;border-radius:12px;display:grid;place-items:center;
+      background:linear-gradient(135deg,var(--accent),#06b6d4);
+      box-shadow:0 6px 18px rgba(7,10,20,0.6);
+      transform:rotate(-15deg);
+    }
+    .logo h1{font-size:18px;margin:0}
+    .sub{opacity:0.8;font-size:13px}
+
+    main{
+      background:linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:18px;padding:28px;box-shadow:0 8px 40px rgba(2,6,23,0.6);backdrop-filter: blur(6px);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+
+    .card{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:center}
+    .center{
+      padding:22px;border-radius:14px;background:linear-gradient(180deg,var(--glass), rgba(255,255,255,0.02));
+      min-height:220px;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,0.02);
+    }
+    .challenge-title{font-size:20px;margin:0 0 8px 0}
+    .challenge-text{font-size:16px;line-height:1.45;margin:0;color:#dbeafe}
+
+    .meta{display:flex;gap:12px;margin-top:12px;align-items:center}
+    .chip{background:rgba(255,255,255,0.03);padding:8px 12px;border-radius:999px;font-size:13px}
+
+    .actions{display:flex;gap:12px;margin-top:16px}
+    button.btn{
+      border:0;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer;
+      background:linear-gradient(90deg,var(--accent),#06b6d4);color:white;box-shadow:0 8px 18px rgba(124,58,237,0.18);
+      transition:transform .18s ease, box-shadow .18s ease;
+    }
+    button.btn:active{transform:translateY(2px)}
+    button.ghost{
+      background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;padding:10px 12px;border-radius:10px;
+    }
+
+    aside{
+      padding:18px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.02);
+    }
+    .progress{display:flex;flex-direction:column;gap:10px}
+    .progress .line{height:8px;background:rgba(255,255,255,0.04);border-radius:999px;overflow:hidden}
+    .progress .bar{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--accent),#06b6d4);transition:width .6s cubic-bezier(.2,.9,.3,1)}
+    .small{font-size:13px;opacity:0.85}
+
+    /* playful animation */
+    .sparkles{position:absolute;right:-30px;top:-30px;opacity:0.12;transform:rotate(20deg);}
+    .sparkles svg{width:220px;height:220px}
+
+    /* daily badge */\    
+    .date-badge{position:absolute;left:16px;top:16px;padding:6px 10px;border-radius:999px;background:rgba(0,0,0,0.3);
+      border:1px solid rgba(255,255,255,0.03);font-weight:700;font-size:13px}
+
+    footer{margin-top:14px;display:flex;justify-content:space-between;gap:12px;align-items:center}
+    .history{display:flex;gap:8px;flex-wrap:wrap}
+    .tag{background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:8px;font-size:13px}
+
+    /* confetti animation for success */
+    .confetti{pointer-events:none;position:absolute;inset:0;display:none}
+    .confetti.show{display:block}
+    .dot{position:absolute;width:10px;height:14px;opacity:0;transform-origin:center;animation:fall 1.6s linear forwards}
+    @keyframes fall{
+      0%{opacity:1;transform:translateY(-20px) rotate(0deg)}
+      100%{opacity:1;transform:translateY(260px) rotate(360deg)}
+    }
+
+    /* responsive */
+    @media (max-width:880px){
+      .card{grid-template-columns:1fr}
+      aside{order:2}
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <header>
+      <div class="logo">
+        <div class="mark">⚡</div>
+        <div>
+          <h1>Daily Challenge • Spark</h1>
+          <div class="sub">Small challenges to level up your day</div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="card">
+        <section class="center" id="mainCard">
+          <div class="date-badge" id="dateBadge">—</div>
+          <div class="sparkles" aria-hidden>
+            <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g fill="#fff">
+                <circle cx="18" cy="24" r="4" opacity="0.4" />
+                <circle cx="90" cy="8" r="6" opacity="0.25" />
+                <circle cx="64" cy="92" r="3" opacity="0.35" />
+              </g>
+            </svg>
+          </div>
+
+          <h2 class="challenge-title" id="challengeTitle">Your challenge for today</h2>
+          <p class="challenge-text" id="challengeText">Loading challenge…</p>
+
+          <div class="meta">
+            <div class="chip" id="difficultyChip">Level: Easy</div>
+            <div class="chip small" id="streakChip">Streak: 0 days</div>
+          </div>
+
+          <div class="actions">
+            <button class="btn" id="completeBtn">Mark as Done ✓</button>
+            <button class="ghost" id="skipBtn">Show another</button>
+            <button class="ghost" id="saveBtn">★ Save</button>
+          </div>
+
+          <div class="confetti" id="confetti"></div>
+        </section>
+
+        <aside>
+          <div class="progress">
+            <div class="small">Today's progress</div>
+            <div class="line" aria-hidden>
+              <div class="bar" id="progressBar" style="width:0%"></div>
+            </div>
+            <div class="small">Saved challenges</div>
+            <div class="history" id="savedList">
+              <div class="tag">None yet</div>
+            </div>
+          </div>
+
+          <footer>
+            <div class="small">Powered by local browser • No account needed</div>
+            <div>
+              <button class="ghost" id="shareBtn">Copy to clipboard</button>
+            </div>
+          </footer>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+<script>
+(() => {
+  const challenges = [
+    {text: 'Drink 1.5L of water before evening.', level:'Easy'},
+    {text: 'Take a 20-minute walk without phone.', level:'Easy'},
+    {text: 'Send a short appreciative message to someone.', level:'Easy'},
+    {text: 'Clean and organize one drawer or shelf.', level:'Medium'},
+    {text: 'Read one chapter of a book.', level:'Medium'},
+    {text: 'Try a 10-minute guided breathing session.', level:'Easy'},
+    {text: 'Cook (or learn) one simple new recipe.', level:'Medium'},
+    {text: 'Declutter your desktop (digital) for 15 minutes.', level:'Medium'},
+    {text: 'Sketch anything for 10 minutes — no skill needed.', level:'Easy'},
+    {text: 'Unfollow 3 accounts that don\'t bring value.', level:'Hard'},
+    {text: 'Write down three things you\'re grateful for.', level:'Easy'},
+    {text: 'Plan a 30-minute offline hobby session this week.', level:'Medium'},
+    {text: 'Try a screen-free evening from 8–9 PM.', level:'Hard'},
+    {text: 'Do 10 pushups (or any micro workout).', level:'Easy'},
+    {text: 'Compliment a stranger (safely).', level:'Easy'},
+    {text: 'Spend 15 minutes learning a new vocabulary word.', level:'Easy'},
+    {text: 'Take one photo that makes you smile.', level:'Easy'},
+    {text: 'Revisit and update one goal for the month.', level:'Medium'},
+    {text: 'Practice a short coding exercise for 20 minutes.', level:'Medium'},
+    {text: 'Try a 5-minute posture/stretch break every 2 hours today.', level:'Easy'}
+  ];
+
+  // DOM
+  const dateBadge = document.getElementById('dateBadge');
+  const challengeTitle = document.getElementById('challengeTitle');
+  const challengeText = document.getElementById('challengeText');
+  const difficultyChip = document.getElementById('difficultyChip');
+  const streakChip = document.getElementById('streakChip');
+  const completeBtn = document.getElementById('completeBtn');
+  const skipBtn = document.getElementById('skipBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const savedList = document.getElementById('savedList');
+  const progressBar = document.getElementById('progressBar');
+  const confettiEl = document.getElementById('confetti');
+  const shareBtn = document.getElementById('shareBtn');
+  const mainCard = document.getElementById('mainCard');
+
+  // Storage keys
+  const KEY = 'spark.daily';
+
+  function todayKey(){
+    const d = new Date();
+    return d.toISOString().slice(0,10); // YYYY-MM-DD
+  }
+
+  // Initialize or read storage
+  function loadState(){
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return {history:{},saved:[],lastStreakDate:null,streak:0};
+    try{ return JSON.parse(raw);}catch(e){return {history:{},saved:[],lastStreakDate:null,streak:0}};
+  }
+
+  function saveState(s){ localStorage.setItem(KEY, JSON.stringify(s)); }
+
+  let state = loadState();
+
+  function pickChallengeForDate(dateStr){
+    // Use hashed index based on date so it's deterministic per day
+    const seed = Array.from(dateStr).reduce((a,c)=>a + c.charCodeAt(0), 0);
+    const idx = seed % challenges.length;
+    return {idx, ...challenges[idx]};
+  }
+
+  function renderSaved(){
+    savedList.innerHTML='';
+    if(!state.saved || state.saved.length===0){
+      savedList.innerHTML = '<div class="tag">None yet</div>';
+      return;
+    }
+    state.saved.slice().reverse().forEach(t=>{
+      const el = document.createElement('div'); el.className='tag'; el.textContent = t.slice(0,40) + (t.length>40? '…':'');
+      savedList.appendChild(el);
+    });
+  }
+
+  function render(){
+    const dKey = todayKey();
+    dateBadge.textContent = new Date().toDateString();
+
+    let chosen = pickChallengeForDate(dKey);
+    challengeTitle.textContent = 'Your challenge for today';
+    challengeText.textContent = chosen.text;
+    difficultyChip.textContent = 'Level: ' + chosen.level;
+
+    // progress & streak
+    const done = !!(state.history && state.history[dKey] && state.history[dKey].done);
+    progressBar.style.width = done ? '100%' : '10%';
+    streakChip.textContent = 'Streak: ' + (state.streak || 0) + ' day' + ((state.streak||0)>1?'s':'');
+
+    // save button state
+    const saved = state.saved && state.saved.includes(chosen.text);
+    saveBtn.textContent = saved ? 'Saved ✓' : '★ Save';
+
+    renderSaved();
+  }
+
+  function markDone(){
+    const dKey = todayKey();
+    if(!state.history) state.history = {};
+    if(state.history[dKey] && state.history[dKey].done) return triggerConfetti();
+
+    state.history[dKey] = {done:true,time:Date.now()};
+
+    // update streak
+    const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+    const yKey = yesterday.toISOString().slice(0,10);
+    if(state.lastStreakDate === yKey){
+      state.streak = (state.streak||0) + 1;
+    } else if(state.lastStreakDate === todayKey()){
+      // already counted
+    } else {
+      state.streak = 1; // reset
+    }
+    state.lastStreakDate = todayKey();
+
+    saveState(state);
+    render();
+    triggerConfetti();
+  }
+
+  function triggerConfetti(){
+    confettiEl.innerHTML='';
+    const colors = ['#ff7b7b','#ffd26b','#7c3aed','#06b6d4','#7ee787'];
+    for(let i=0;i<18;i++){
+      const dot = document.createElement('div');
+      dot.className='dot';
+      dot.style.left = (10 + Math.random()*80) + '%';
+      dot.style.top = (-10 - Math.random()*10)+'%';
+      dot.style.background = colors[Math.floor(Math.random()*colors.length)];
+      dot.style.width = (6 + Math.random()*12)+'px';
+      dot.style.height = (8 + Math.random()*14)+'px';
+      dot.style.animationDuration = (1.2 + Math.random()*1)+'s';
+      confettiEl.appendChild(dot);
+    }
+    confettiEl.classList.add('show');
+    setTimeout(()=> confettiEl.classList.remove('show'), 1600);
+  }
+
+  function showAnother(){
+    // choose a random challenge (not strictly daily) and show temporarily
+    const r = Math.floor(Math.random()*challenges.length);
+    challengeText.textContent = challenges[r].text;
+    difficultyChip.textContent = 'Level: ' + challenges[r].level + ' • (random)';
+  }
+
+  function toggleSave(){
+    const dKey = todayKey();
+    const chosen = pickChallengeForDate(dKey).text;
+    state.saved = state.saved || [];
+    if(state.saved.includes(chosen)){
+      state.saved = state.saved.filter(x=>x!==chosen);
+    } else {
+      state.saved.push(chosen);
+    }
+    saveState(state);
+    render();
+  }
+
+  function copyToClipboard(){
+    const text = challengeText.textContent + ' — Daily Challenge';
+    navigator.clipboard?.writeText(text).then(()=>{
+      const prev = shareBtn.textContent;
+      shareBtn.textContent = 'Copied ✓';
+      setTimeout(()=> shareBtn.textContent = prev,1200);
+    }).catch(()=>{
+      alert('Unable to copy.');
+    });
+  }
+
+  // Event listeners
+  completeBtn.addEventListener('click', markDone);
+  skipBtn.addEventListener('click', showAnother);
+  saveBtn.addEventListener('click', toggleSave);
+  shareBtn.addEventListener('click', copyToClipboard);
+
+  // initial render
+  render();
+
+  // update every minute in case user keeps site open across midnight
+  setInterval(()=>{
+    render();
+  }, 60*1000);
+
+})();
+</script>
+</body>
+</html>
