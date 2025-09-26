@@ -20,9 +20,6 @@ It gives you a **new challenge every day**, tracks your streaks, and lets you sa
 
 ---
 
-## 🚀 Getting Started
-
 ### 1️⃣ Clone or Download
 ```bash
-git clone https://github.com/your-username/daily-challenge-website.git
-cd daily-challenge-website
+https://dasjoyee635-web.github.io/Daily-challenge-website/
